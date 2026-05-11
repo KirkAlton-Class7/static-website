@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Image Carousel | International Beaches</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 30%, #0b2b3b, #0a1a2a, #030e1a);
+      font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+    }
+
+    /* Subtle animated background texture to enhance glass effect */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(rgba(255,255,240,0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ----- Glassy Heading ----- */
+    .hero-heading {
+      text-align: center;
+      max-width: 850px;
+      margin-bottom: 2.2rem;
+      z-index: 2;
+      position: relative;
+    }
+
+    .hero-heading h1 {
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+      font-weight: 600;
+      background: linear-gradient(135deg, #FFF8E7, #D4E6F1, #FEF9E6);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      letter-spacing: -0.3px;
+      backdrop-filter: blur(2px);
+      padding: 0.4rem 1rem;
+      display: inline-block;
+    }
+
+    .hero-heading h2 {
+      font-size: clamp(1rem, 4vw, 1.4rem);
+      font-weight: 500;
+      color: #e2e8f0;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      margin-top: 0.5rem;
+      letter-spacing: -0.2px;
+      background: none;
+      -webkit-background-clip: unset;
+      background-clip: unset;
+      padding: 0 0.5rem;
+      opacity: 0.92;
+      transition: opacity 0.2s;
+    }
+
+    .hero-heading h2:hover {
+      opacity: 1;
+    }
+
+    /* ----- Main Widget — Glassy Carousel ----- */
+    .glassy-widget {
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+      border-radius: 2.5rem;
+      background: rgba(20, 30, 40, 0.28);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      transition: transform 0.25s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .glassy-widget:hover {
+      box-shadow: 0 30px 50px -16px rgba(0, 0, 0, 0.5);
+      transform: translateY(-3px);
+    }
+
+    /* Image Container — relative for buttons overlay */
+    .widget-image-container {
+      position: relative;
+      width: 100%;
+      background: #0a1a22;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Main carousel image with smooth transition & crisp look */
+    .carousel-image {
+      width: 100%;
+      height: auto;
+      max-height: 520px;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      opacity: 1;
+      will-change: transform;
+    }
+
+    /* ---- Glassy Overlay Buttons (hidden by default, appear on hover) ---- */
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 52px;
+      height: 52px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 500;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: opacity 0.25s ease, transform 0.2s ease, background 0.2s;
+      z-index: 25;
+      outline: none;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+      line-height: 1;
+      letter-spacing: -2px;
+      opacity: 0;          /* hidden by default */
+      pointer-events: none; /* so they don't block clicks when hidden */
+    }
+
+    /* Show buttons only when hovering over the image container */
+    .widget-image-container:hover .nav-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(12px);
+      transform: translateY(-50%) scale(1.05);
+      border-color: rgba(255, 255, 245, 0.8);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-btn:active {
+      transform: translateY(-50%) scale(0.96);
+      background: rgba(255, 255, 255, 0.65);
+    }
+
+    .prev-btn {
+      left: 20px;
+    }
+
+    .next-btn {
+      right: 20px;
+    }
+
+    /* ---- Info Panel (glassy footer inside widget, shows name & image counter) ---- */
+    .widget-info {
+      background: rgba(10, 20, 28, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 0.9rem 1.8rem;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-weight: 500;
+      color: #FEF7E6;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .slide-counter-badge {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      padding: 0.3rem 0.9rem;
+      border-radius: 80px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255,255,210,0.3);
+      font-family: monospace;
+    }
+
+    .beach-caption {
+      font-size: 1.2rem;
+      font-weight: 500;
+      background: linear-gradient(120deg, #fff6e0, #ffe6c7);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .beach-caption::before {
+      content: "🏝️";
+      font-size: 1.2rem;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+    }
+
+    /* Optional hover effect on whole widget */
+    @media (max-width: 680px) {
+      .nav-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.6rem;
+      }
+      .prev-btn {
+        left: 12px;
+      }
+      .next-btn {
+        right: 12px;
+      }
+      .widget-info {
+        padding: 0.7rem 1.2rem;
+      }
+      .beach-caption {
+        font-size: 0.95rem;
+      }
+      .slide-counter-badge {
+        font-size: 0.75rem;
+      }
+      .glassy-widget {
+        border-radius: 1.8rem;
+      }
+    }
+
+    /* Subtle shine effect */
+    .glassy-widget::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0) 100%);
+      transform: skewX(-20deg);
+      pointer-events: none;
+      transition: left 0.7s ease;
+    }
+
+    .glassy-widget:hover::after {
+      left: 150%;
+    }
+
+    /* Loading state minimal */
+    .carousel-image.loading {
+      opacity: 0.7;
+    }
+
+    /* Focus ring for accessibility */
+    .nav-btn:focus-visible {
+      outline: 3px solid #ffdd99;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero-heading">
+    <h1>Dusty Cloud Engineers</h1>
+    <h2>We get all the jobs, all the money, and all the beaches.</h2>
+  </div>
+
+  <div class="glassy-widget">
+    <!-- Image section with integrated buttons (prev/next inside widget) -->
+    <div class="widget-image-container">
+      <img id="carousel-image" class="carousel-image" src="assets/images/beaches/bali-indonesia.jpg" alt="Bali paradise coast">
+      <button class="nav-btn prev-btn" id="prevButton" aria-label="Previous beach">❮</button>
+      <button class="nav-btn next-btn" id="nextButton" aria-label="Next beach">❯</button>
+    </div>
+
+    <!-- Info panel: carries slide counter + beach name (all part of widget) -->
+    <div class="widget-info">
+      <div class="slide-counter-badge" id="slideCounter">1 / 10</div>
+      <div class="beach-caption" id="beachCaption">Bali, Indonesia</div>
+    </div>
+  </div>
+
+  <script>
+    // ----- Image gallery paths
+    const images = [
+      "assets/images/beaches/bali-indonesia.jpg",
+      "assets/images/beaches/bora-bora-french-polynesia.jpg",
+      "assets/images/beaches/fiji.jpg",
+      "assets/images/beaches/krabi-thailand.jpg",
+      "assets/images/beaches/maldives.jpg",
+      "assets/images/beaches/maui-hawaii.jpg",
+      "assets/images/beaches/sardinia-italy.jpg",
+      "assets/images/beaches/seychelles.jpg",
+      "assets/images/beaches/turks-and-caicos.jpg",
+      "assets/images/beaches/whitsunday-islands-australia.jpg"
+    ];
+
+    // ----- Helper: extract location name from file path
+    function getBeachDisplayName(imagePath) {
+      // get last part after last slash
+      let fileName = imagePath.split('/').pop();
+      // remove extension
+      let nameWithoutExt = fileName.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+      // replace hyphens and dashes with spaces, smart capitalizing
+      let rawName = nameWithoutExt.replace(/[-_]/g, ' ');
+      // Special cases mapping for better aesthetics
+      const specialMapping = {
+        "bali indonesia": "Bali, Indonesia",
+        "bora bora french polynesia": "Bora Bora, French Polynesia",
+        "fiji": "Fiji Islands",
+        "krabi thailand": "Krabi, Thailand",
+        "maldives": "Maldives",
+        "maui hawaii": "Maui, Hawaii",
+        "sardinia italy": "Sardinia, Italy",
+        "seychelles": "Seychelles Archipelago",
+        "turks and caicos": "Turks & Caicos",
+        "whitsunday islands australia": "Whitsunday Islands, Australia"
+      };
+      const lowerRaw = rawName.toLowerCase();
+      if (specialMapping[lowerRaw]) {
+        return specialMapping[lowerRaw];
+      }
+      // generic title case fallback
+      return rawName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
+
+    // Document Object Model (DOM) Elements
+    const carouselImg = document.getElementById("carousel-image");
+    const slideCounterSpan = document.getElementById("slideCounter");
+    const beachCaptionSpan = document.getElementById("beachCaption");
+
+    let currentIndex = 0;
+    let isTransitioning = false;   // prevent rapid spam during fade
+
+    // Update entire widget UI: image, counter, caption, alt text
+    function updateWidgetUI(index) {
+      if (isTransitioning) return;
+      isTransitioning = true;
+
+      const newImageSrc = images[index];
+      const beachName = getBeachDisplayName(newImageSrc);
+
+      // Optional: short fade effect for smoothness
+      carouselImg.style.opacity = "0.6";
+      
+      // Preload image to avoid flicker, then set source
+      const tempImg = new Image();
+      tempImg.onload = () => {
+        carouselImg.src = newImageSrc;
+        carouselImg.alt = beachName;
+        // Update counter display (1-based index)
+        slideCounterSpan.textContent = `${index + 1} / ${images.length}`;
+        beachCaptionSpan.textContent = beachName;
+        // restore opacity with transition
+        setTimeout(() => {
+          carouselImg.style.opacity = "1";
+          isTransitioning = false;
+        }, 50);
+      };
+      tempImg.onerror = () => {
+        // Fallback if image fails to load, still update text
+        carouselImg.src = newImageSrc;
+        carouselImg.alt = beachName;
+        slideCounterSpan.textContent = `${index + 1} / ${images.length}`;
+        beachCaptionSpan.textContent = beachName;
+        carouselImg.style.opacity = "1";
+        isTransitioning = false;
+      };
+      tempImg.src = newImageSrc;
+    }
+
+    // Change slide with direction: +1 (next) or -1 (prev)
+    function changeSlide(direction) {
+      if (isTransitioning) return;   // prevent overlapping transitions
+      let newIndex = currentIndex + direction;
+      
+      if (newIndex < 0) {
+        newIndex = images.length - 1;
+      } else if (newIndex >= images.length) {
+        newIndex = 0;
+      }
+      
+      currentIndex = newIndex;
+      updateWidgetUI(currentIndex);
+    }
+
+    // ----- Keyboard support: left/right arrows for widget interaction -----
+    function handleKeyDown(e) {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        changeSlide(-1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        changeSlide(1);
+      }
+    }
+
+    // ----- Manual binding for buttons + initial load with style -----
+    function initCarousel() {
+      // set initial index (0)
+      currentIndex = 0;
+      updateWidgetUI(0);
+      
+      // Attach event listeners to glassy buttons (widget embedded)
+      const prevBtn = document.getElementById("prevButton");
+      const nextBtn = document.getElementById("nextButton");
+      
+      if (prevBtn) {
+        prevBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          changeSlide(-1);
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          changeSlide(1);
+        });
+      }
+      
+      // Global keyboard control for widget immersion
+      window.addEventListener("keydown", handleKeyDown);
+      
+      // Preload first image - lazy friendly
+      const preloadLink = document.createElement('link');
+      preloadLink.rel = 'preload';
+      preloadLink.as = 'image';
+      preloadLink.href = images[0];
+      document.head.appendChild(preloadLink);
+    }
+    
+    // Handle edge case of dynamic image loading errors
+    window.addEventListener("load", () => {
+      initCarousel();
+    });
+    
+    // Prevents memory leaks
+    if (typeof window !== 'undefined') {
+      // ensure that if the component gets dynamically replaced, it doesn't run twice (prevents duplicate events)
+      if (!window._carouselInitialized) {
+        window._carouselInitialized = true;
+      } else {
+        // if re-run, remove old listeners? but in normal flow no.
+      }
+    }
+    
+    // Add hover glow to info panel
+    const widgetDiv = document.querySelector('.glassy-widget');
+    if (widgetDiv) {
+      widgetDiv.addEventListener('touchstart', () => {}, {passive: true});
+    }
+  </script>
+</body>
+</html>
