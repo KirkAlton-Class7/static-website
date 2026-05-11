@@ -1,6 +1,6 @@
 # Static Website on GCS
 
-[Link to my basic static website](https://storage.googleapis.com/kirkdevsecops-website/index.html)
+[Link to the basic static website](https://storage.googleapis.com/kirkdevsecops-website/index.html)
 
 ---
 
